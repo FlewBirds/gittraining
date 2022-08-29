@@ -1,0 +1,33 @@
+[ec2-user@centos gittraining]$ rm 2
+[ec2-user@centos gittraining]$ echo test > touch1
+[ec2-user@centos gittraining]$ echo test > touch2
+[ec2-user@centos gittraining]$ echo test > touch3
+[ec2-user@centos gittraining]$ ls
+3}             first.sh     githubtestfile  ifelif.sh  switchcase.sh  test1.sh  touch1  touch3         whileloop.sh
+array_test.sh  for_loop.sh  ifcondtion.sh   script.sh  test.sh        test2.sh  touch2  while_loop.sh
+[ec2-user@centos gittraining]$ git add .
+[ec2-user@centos gittraining]$ git commit -m "adding only tocuh1 and 2 ignore 3" -- touch1,touch2
+error: pathspec 'touch1,touch2' did not match any file(s) known to git
+[ec2-user@centos gittraining]$ git commit -m "adding only tocuh1 and 2 ignore 3" -- touch1
+[master affafdf] adding only tocuh1 and 2 ignore 3
+ 1 file changed, 1 insertion(+)
+ create mode 100644 touch1
+[ec2-user@centos gittraining]$ git commit -m "adding only tocuh1 and 2 ignore 3" -- touch2
+[master 298b2d6] adding only tocuh1 and 2 ignore 3
+ 1 file changed, 1 insertion(+)
+ create mode 100644 touch2
+[ec2-user@centos gittraining]$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   3}
+	modified:   test.sh
+	new file:   touch3
+
+[ec2-user@centos gittraining]$ git commit -m "adding only tocuh1 and 2 ignore 3" -- {touch3,test.sh}
+[master 0acbe0c] adding only tocuh1 and 2 ignore 3
+ 2 files changed, 3 insertions(+)
+ create mode 100644 touch3
