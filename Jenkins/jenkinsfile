@@ -15,7 +15,7 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'Jenkins-Git', url: 'https://github.com/FlewBirds/gittraining.git']]])
-                sh './whileloop.sh'
+                sh 'sh whileloop.sh'
             }
         }
     }
