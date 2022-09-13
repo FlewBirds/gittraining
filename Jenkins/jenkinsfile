@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Print build number') {
+            steps {
+                echo "My first Pipeline ${BUILD_NUMBER}"
+            }
+        }
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'Jenkins-Git', url: 'https://github.com/FlewBirds/gittraining.git']]])
+                sh './whileloop.sh'
+            }
+        }
+    }
+}
