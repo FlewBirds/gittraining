@@ -45,21 +45,21 @@ resource "aws_route_table" "wsc_pub_sub_rt" {
     vpc_id = aws_vpc.wsc_vpc.id
 
     route {
-    cidr_block = "10.0.1.0/24"
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.wsc_igw.id
   }
    
    tags = {
-    Name = "wsc_pub_sub_rt_1"
-
+    Name = "wsc_pub_sub_rt"
    }
-  
 }
 
 resource "aws_route_table_association" "wsc_pub_sub_rt_associate" {
       route_table_id = aws_route_table.wsc_pub_sub_rt.id
       subnet_id = aws_subnet.wsc_pub_sub_1.id
 }
+
+
 
 
 
