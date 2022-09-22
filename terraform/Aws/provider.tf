@@ -1,20 +1,42 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "4.30.0"
     }
   }
+
+  backend "s3" {
+    bucket = "fbstate1"
+    key = "dev/tfstate/terraform.tfstate"
+    region = "us-east-2"
+
+    dynamodb_table = "tfstate_lock"
+    encrypt = true
+  }
 }
 
-provider "aws" {
-  # Configuration options
-  region = "us-east-2"
-  # access_key = "<access key>"
-  # secret_key = "<secret key>"
 
-  shared_config_files      = ["/Users/rsrighakollapu/.aws/confif"]
-  shared_credentials_files = ["/Users/rsrighakollapu/.aws/credentials"]
+resource "aws_dynamodb_table" "tfstate_lock" {
+  name = "tfstate_lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+    }
+  }
+
+
+# provider "aws" {
+#   # Configuration options
+#   region = "us-east-2"
+#   # access_key = "<access key>"
+#   # secret_key = "<secret key>"
+
+#   shared_config_files      = ["/Users/rsrighakollapu/.aws/confif"]
+#   shared_credentials_files = ["/Users/rsrighakollapu/.aws/credentials"]
   # profile                  = "customprofile"
 
   # assume_role {
@@ -29,7 +51,7 @@ provider "aws" {
   #   web_identity_token_file = "/Users/tf_user/secrets/web-identity-token"
   # }
 
-}
+# }
 
 
 #################
