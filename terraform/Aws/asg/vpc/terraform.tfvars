@@ -1,0 +1,1 @@
+# Define values for your resources

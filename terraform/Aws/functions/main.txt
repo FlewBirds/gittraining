@@ -1,0 +1,50 @@
+# Count Integer [1,2,3]
+
+# For each map or set key,vlaue
+
+#Dynamic Blocks Map or Set
+
+resource "aws_instance" "cout_test" {
+    count = 3
+    tags = {
+        Name = "instance-number-${count.index}"
+    }
+}
+
+ #Cout references
+ #aws_instance.web_server[0].name - only one instance
+ #aws_instance.web_server[*].name - All Instances
+
+ ###################################################
+
+ #For_each Note: set is an unordered collection of objects
+ # tuple and list are ordered collections
+
+ resource "aws_s3_bucket_object" "pizzas" {
+    for_each = {
+      margaretta = "image.margaretta"
+      farmville = "image.farmville" 
+    }
+   key = each.vlaue
+   source = ".${each.value}"
+   tags = {
+     "Name" = "each.key"
+   }
+ }
+
+ #aws_s3_bucket_object.pizzas["margaretta"].id #single instance
+ #aws_s3_bucket_object.pizzas[*].id
+
+ #looping Targets
+ # Primary Resources
+ # "aws_subnet" # Count loop
+ # aws_instance # count loop
+ # aws_s3_bucket_object # For_each loop
+
+ # Impacted
+ # aws_route_table-association
+ # aws_lb_target_group_attachment
+
+  
+
+
