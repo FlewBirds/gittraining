@@ -26,30 +26,6 @@ resource "aws_vpc_ipv4_cidr_block_association" "secondary_cidr" {
 data "aws_availability_zones" "us-east-2" {
   state =  "available"
 }
-### We can refer in the following way to launch resources in required az (us-east-2a, us-east-2b, us-east-2c) ####
-
-### Create two public subnets ###
-# resource "aws_subnet" "wsc_pub_sub_1" {
-#   vpc_id     = aws_vpc.wsc_vpc.id
-#   cidr_block = "10.0.1.0/24"
-#   availability_zone = "${data.aws_availability_zones.us-east-2.names[0]}"  # [0] this will represent availablity zone us-east-2a
-
-#   tags = {
-#     Name = "wsc_pub_sub"
-#   }
-# }
-
-# resource "aws_subnet" "wsc_pub_sub_2" {
-#   vpc_id     = aws_vpc.wsc_vpc.id
-#   cidr_block = "10.0.2.0/24"
-#   availability_zone = "${data.aws_availability_zones.us-east-2.names[1]}"  # [1] this will represent availablity zone us-east-2b
-
-#   tags = {
-#     Name = "wsc_pub_sub"
-#   }
-# }
-
-# create subnet using functions
 
 resource "aws_subnet" "wsc_pub_subnets" {
   count = var.vpc_subnet_count
@@ -82,16 +58,6 @@ resource "aws_route_table" "wsc_pub_sub_rt" {
    }
 }
 
-### one Route table Associated to multiple subnets (sub 1 & 2) ####
-# resource "aws_route_table_association" "wsc_pub_sub_rt_associate1" {
-#       route_table_id = aws_route_table.wsc_pub_sub_rt.id
-#       subnet_id = aws_subnet.wsc_pub_sub_1.id
-# }
-# resource "aws_route_table_association" "wsc_pub_sub_rt_associate2" {
-#       route_table_id = aws_route_table.wsc_pub_sub_rt.id
-#       subnet_id = aws_subnet.wsc_pub_sub_2.id
-# }
-
 resource "aws_route_table_association" "wsc_pub_sub_rt_associate" {
       count = var.vpc_subnet_count
       route_table_id = aws_route_table.wsc_pub_sub_rt.id
@@ -118,27 +84,6 @@ resource "aws_nat_gateway" "wsc_ngw" {
     aws_internet_gateway.wsc_igw
   ]
 }
-
-#### Create private subnet using VPC seconday CIDR block ####
-# resource "aws_subnet" "wsc_prv_sub_1" {
-#   vpc_id     = aws_vpc.wsc_vpc.id
-#   cidr_block = "172.2.1.0/24"
-#   availability_zone = "${data.aws_availability_zones.us-east-2.names[0]}"  # [0] this will represent availablity zone us-east-2a
-
-#   tags = {
-#     Name = "wsc_prv_sub_1"
-#   }
-# }
-
-# resource "aws_subnet" "wsc_prv_sub_2" {
-#   vpc_id     = aws_vpc.wsc_vpc.id
-#   cidr_block = "172.2.2.0/24"
-#   availability_zone = "${data.aws_availability_zones.us-east-2.names[1]}"  # [1] this will represent availablity zone us-east-2b
-
-#   tags = {
-#     Name = "wsc_prv_sub_2"
-#   }
-# }
 
 resource "aws_subnet" "wsc_prv_subnets" {
   count = var.vpc_subnet_count
@@ -186,23 +131,6 @@ data "aws_ssm_parameter" "ami" {
   name            = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
 
-# data "aws_subnet_ids" "exmaple" {
-#   vpc_id = var.vpc_id
-# }
-
-# data "aws_subnet" "example" {
-#   for_each = data.aws_subnet_ids.example.ids
-#   id       = each.value
-# }
-
-# data "aws_subnets" "private" {
-#   vpc_id = aws_vpc.wsc_vpc.id
-
-#   tags = {
-#     Tier = "Private"
-#   }
-# }
-
   resource "aws_instance" "wsc_ec2_vms_pub" {
     count = "${length(aws_subnet.wsc_pub_subnets[*])}"
     ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
@@ -226,28 +154,3 @@ data "aws_ssm_parameter" "ami" {
     ]
 
   }
-
-########## Create public network instances ##############
-#   data "aws_subnet_ids" "public" {
-#   vpc_id = aws_vpc.wsc_vpc.id
-
-#   tags = {
-#     Tier = "Public"
-#   }
-# }
-
-#   resource "aws_instance" "wsc_ec2_vms_prv" {
-#     #for_each        = data.aws_subnets.private
-#     #for_each = aws_subnet.wsc_pub_subnets[*]
-#     #count           = var.vpc_subnet_count
-#     count           = 
-#     ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
-#     instance_type   = var.instance_type
-#     #subnet_id       = each.value.id
-#     subnet_id       = aws_subnet.wsc_prv_subnets[*].id
-    
-#     depends_on = [
-#       aws_subnet.wsc_pub_subnets, aws_subnet.wsc_prv_subnets
-#     ]
-#   }
-
