@@ -125,7 +125,7 @@ resource "aws_route_table" "wsc_prv_sub_rt" {
 
     route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.wsc_igw.id
+    gateway_id = aws_nat_gateway.wsc_ngw.id
   }
    
    tags = {
