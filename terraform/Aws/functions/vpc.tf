@@ -204,19 +204,9 @@ data "aws_ssm_parameter" "ami" {
 # }
 
   resource "aws_instance" "wsc_ec2_vms_pub" {
-    #for_each        = data.aws_subnets.private
-    #for_each = aws_subnet.wsc_pub_subnets
-    #count           = var.vpc_subnet_count
-    #for_each = {for cnt in aws_subnet.wsc_pub_subnets[*]: cnt.aws_subnet_ids => cnt}
-  #   for_each = {for cnt in aws_subnet.wsc_pub_subnets[*].id: 
-  #   cnt. => cnt
-  #   #if x.tags["Access"] == "public"
-  #  # if cnt.tags["Tier"] == "Public"
-  #   }
     count = "${length(aws_subnet.wsc_pub_subnets[*])}"
     ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
     instance_type   = var.instance_type
-    #subnet_id       = each.value.id
     subnet_id       = aws_subnet.wsc_pub_subnets[count.index].id
     
     depends_on = [
@@ -225,6 +215,17 @@ data "aws_ssm_parameter" "ami" {
 
   }
 
+  resource "aws_instance" "wsc_ec2_vms_prv" {
+    count = "${length(aws_subnet.wsc_prv_subnets[*])}"
+    ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
+    instance_type   = var.instance_type
+    subnet_id       = aws_subnet.wsc_prv_subnets[count.index].id
+    
+    depends_on = [
+      aws_subnet.wsc_pub_subnets, aws_subnet.wsc_prv_subnets
+    ]
+
+  }
 
 ########## Create public network instances ##############
 #   data "aws_subnet_ids" "public" {
