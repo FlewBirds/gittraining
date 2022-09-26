@@ -152,5 +152,8 @@ data "aws_ssm_parameter" "ami" {
     depends_on = [
       aws_subnet.wsc_pub_subnets, aws_subnet.wsc_prv_subnets
     ]
-
   }
+
+#cidrsubnet(prefix, newbits, netnum)
+
+
