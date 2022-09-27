@@ -6,8 +6,7 @@
 
 #Step 1: created single CIDR Block - 10.0.0.0/16 is default
 resource "aws_vpc" "wsc_vpc" {
-  #cidr_block = "10.0.0.0/16"
-  cidr_block = var.vpc_cidr
+  cidr_block = "10.0.0.0/16"
   instance_tenancy = "default"
 
     tags = {
@@ -15,15 +14,10 @@ resource "aws_vpc" "wsc_vpc" {
   }
 }
 
-output "vpc_cidr" {
-  value = aws_vpc.wsc_vpc.cidr_block
-}
-
 #Step 2: created addition CIDR Block and attached to VPC wsc_vpc
 resource "aws_vpc_ipv4_cidr_block_association" "secondary_cidr" {
   vpc_id     = aws_vpc.wsc_vpc.id
-  #cidr_block = "10.1.0.0/16"
-  cidr_block = var.secondary_cidr
+  cidr_block = "10.1.0.0/16"
 }
 
 ### - completed creating VPC with Multiple CIDR's - ###
@@ -34,11 +28,9 @@ data "aws_availability_zones" "us-east-2" {
 }
 
 resource "aws_subnet" "wsc_pub_subnets" {
-  count = var.vpc_pub_subnet_count
+  count = var.vpc_subnet_count
   vpc_id     = aws_vpc.wsc_vpc.id
-  #cidr_block = var.vpc_pub_subnets_cidr_block[count.index]
-  #cidr_block = [for subnet in range(var.vpc_subnet_count) : cidrsubnet(aws_vpc.wsc_vpc.cidr_block, 8, subnet)]
-  cidr_block = cidrsubnet(aws_vpc.wsc_vpc.cidr_block, 8, count.index)
+  cidr_block = var.vpc_pub_subnets_cidr_block[count.index]
   availability_zone = "${data.aws_availability_zones.us-east-2.names[count.index]}"  # [0] this will represent availablity zone us-east-2a
   map_public_ip_on_launch = true
   tags = {
@@ -67,7 +59,7 @@ resource "aws_route_table" "wsc_pub_sub_rt" {
 }
 
 resource "aws_route_table_association" "wsc_pub_sub_rt_associate" {
-      count = var.vpc_pub_subnet_count
+      count = var.vpc_subnet_count
       route_table_id = aws_route_table.wsc_pub_sub_rt.id
       subnet_id = aws_subnet.wsc_pub_subnets[count.index].id
 }
@@ -94,10 +86,9 @@ resource "aws_nat_gateway" "wsc_ngw" {
 }
 
 resource "aws_subnet" "wsc_prv_subnets" {
-  count = var.vpc_prv_subnet_count
+  count = var.vpc_subnet_count
   vpc_id     = aws_vpc.wsc_vpc.id
-  #cidr_block = var.vpc_prv_subnets_cidr_block[count.index]
-  cidr_block = cidrsubnet(aws_vpc_ipv4_cidr_block_association.secondary_cidr.cidr_block, 8, count.index)
+  cidr_block = var.vpc_prv_subnets_cidr_block[count.index]
   availability_zone = "${data.aws_availability_zones.us-east-2.names[count.index]}"  # [0] this will represent availablity zone us-east-2a
   map_public_ip_on_launch = false
 
@@ -123,46 +114,9 @@ resource "aws_route_table" "wsc_prv_sub_rt" {
 
 
 resource "aws_route_table_association" "wsc_prv_sub_rt_associate" {
-      count = var.vpc_prv_subnet_count
+      count = var.vpc_subnet_count
       route_table_id = aws_route_table.wsc_prv_sub_rt.id
       subnet_id = aws_subnet.wsc_prv_subnets[count.index].id
 }
-
-###### create EC2 Instances in each subnet one instance  ########
-
-variable "instance_type" {
-  type        = string
-  description = "Type for EC2 Instnace"
-  default     = "t2.micro"
-}
-
-data "aws_ssm_parameter" "ami" {
-  name            = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
-}
-
-  resource "aws_instance" "wsc_ec2_vms_pub" {
-    count = "${length(aws_subnet.wsc_pub_subnets[*])}"
-    ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
-    instance_type   = var.instance_type
-    subnet_id       = aws_subnet.wsc_pub_subnets[count.index].id
-    
-    depends_on = [
-      aws_subnet.wsc_pub_subnets, aws_subnet.wsc_prv_subnets
-    ]
-
-  }
-
-  resource "aws_instance" "wsc_ec2_vms_prv" {
-    count = "${length(aws_subnet.wsc_prv_subnets[*])}"
-    ami             = nonsensitive(data.aws_ssm_parameter.ami.value)
-    instance_type   = var.instance_type
-    subnet_id       = aws_subnet.wsc_prv_subnets[count.index].id
-    
-    depends_on = [
-      aws_subnet.wsc_pub_subnets, aws_subnet.wsc_prv_subnets
-    ]
-  }
-
-#cidrsubnet(prefix, newbits, netnum)
 
 
