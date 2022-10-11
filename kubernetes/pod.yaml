@@ -1,0 +1,3 @@
+#kubectl run --image=nginx
+#kubectl delete pod <pod name>
+#alias k="kubectl"
